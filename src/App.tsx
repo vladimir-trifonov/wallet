@@ -1,20 +1,17 @@
-import { useContext, useEffect } from 'react'
-import { useErrorBoundary } from 'use-error-boundary'
-import Box from '@mui/material/Box'
-import Grid from '@mui/material/Grid'
-import Container from '@mui/material/Container'
+import { useEffect } from "react"
+import { useErrorBoundary } from "use-error-boundary"
+import Box from "@mui/material/Box"
+import Grid from "@mui/material/Grid"
+import Container from "@mui/material/Container"
 import { toast } from "react-toastify"
+import { useSelector } from "react-redux"
 
-import { AppContext } from './context'
-import { ContextType } from './types'
-import AppBar from './components/AppBar'
-import Wallet from './components/Wallet'
+import AppBar from "./components/AppBar"
+import Wallet from "./components/Wallet"
 
 export const App = (): JSX.Element => {
   const { ErrorBoundary, didCatch, error } = useErrorBoundary()
-  const { state }: ContextType = useContext(AppContext)
-
-  const { web3Provider, chainData } = state
+  const { chainData, web3Provider } = useSelector((state) => (state as any).web3Connect)
 
   useEffect(() => {
     if (didCatch && error) {
@@ -32,9 +29,9 @@ export const App = (): JSX.Element => {
           <Grid
             container
             sx={{
-              height: '100%',
-              justifyContent: 'center',
-              alignItems: 'center',
+              height: "100%",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
             <Grid item>

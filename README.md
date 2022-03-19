@@ -13,6 +13,7 @@ yarn
 
 ```env
 REACT_APP_INFURA_ID=
+REACT_APP_NEXO_ETH_MAIN_NET_CONTRACT_ADDRESS=
 ```
 2. Start the app
             

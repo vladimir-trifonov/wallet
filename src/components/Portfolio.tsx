@@ -1,24 +1,19 @@
-import { useContext } from 'react'
-import Grid from '@mui/material/Grid'
+import Grid from "@mui/material/Grid"
 
-import { AppContext } from '../context'
-import { ContextType } from '../types'
 import Balance from "./Balance"
-import useWeb3Balances from '../hooks/useWeb3Balances'
+import useEth from "../hooks/useEth"
+import useErc20 from "../hooks/useErc20"
+import { useSelector } from "react-redux"
 
 const Portfolio = () => {
-  const { state, dispatch }: ContextType = useContext(AppContext)
-  useWeb3Balances(state, dispatch)
-
-  const { eth, nexo, tokens } = state
+  useEth()
+  const nexoSymbol = useErc20(process.env.REACT_APP_NEXO_ETH_MAIN_NET_CONTRACT_ADDRESS as string)
+  const currencies = useSelector((state) => (state as any).currencies)
 
   return (
     <Grid container spacing={1}>
-      <Balance currency={eth} />
-      <Balance currency={nexo} />
-      {!!tokens?.length && (
-        tokens.map((token: any) => <Balance currency={token} />)
-      )}
+      {currencies?.eth && <Balance currency={currencies.eth} />}
+      {!!currencies[nexoSymbol] && <Balance currency={currencies[nexoSymbol]} />}
     </Grid>
   )
 }

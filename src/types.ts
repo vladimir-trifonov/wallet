@@ -17,188 +17,72 @@ export interface IChainData {
   native_currency: IAssetData
 }
 
-export interface ITxData {
-  from: string
-  to: string
-  nonce: string
-  gasPrice: string
-  gasLimit: string
-  value: string
-  data: string
-}
-
-export interface IBlockScoutTx {
-  value: string
-  txreceipt_status: string
-  transactionIndex: string
-  to: string
-  timeStamp: string
-  nonce: string
-  isError: string
-  input: string
-  hash: string
-  gasUsed: string
-  gasPrice: string
-  gas: string
-  from: string
-  cumulativeGasUsed: string
-  contractAddress: string
-  confirmations: string
-  blockNumber: string
-  blockHash: string
-}
-
-export interface IBlockScoutTokenTx {
-  value: string
-  transactionIndex: string
-  tokenSymbol: string
-  tokenName: string
-  tokenDecimal: string
-  to: string
-  timeStamp: string
-  nonce: string
-  input: string
-  hash: string
-  gasUsed: string
-  gasPrice: string
-  gas: string
-  from: string
-  cumulativeGasUsed: string
-  contractAddress: string
-  confirmations: string
-  blockNumber: string
-  blockHash: string
-}
-
-export interface IParsedTx {
-  timestamp: string
-  hash: string
-  from: string
-  to: string
-  nonce: string
-  gasPrice: string
-  gasUsed: string
-  fee: string
-  value: string
-  input: string
-  error: boolean
-  asset: IAssetData
-  operations: ITxOperation[]
-}
-
-export interface ITxOperation {
-  asset: IAssetData
-  value: string
-  from: string
-  to: string
-  functionName: string
-}
-
-export interface IGasPricesResponse {
-  fastWait: number
-  avgWait: number
-  blockNum: number
-  fast: number
-  fastest: number
-  fastestWait: number
-  safeLow: number
-  safeLowWait: number
-  speed: number
-  block_time: number
-  average: number
-}
-
-export interface IGasPrice {
-  time: number
-  price: number
-}
-
-export interface IGasPrices {
-  timestamp: number
-  slow: IGasPrice
-  average: IGasPrice
-  fast: IGasPrice
-}
-
-export interface IMethodArgument {
-  type: string
-}
-
-export interface IMethod {
-  signature: string
-  name: string
-  args: IMethodArgument[]
-}
-
-export interface IBoxImage {
-  '@type': string
-  contentUrl: {
-    [label: string]: string
-  }
-}
-
-export interface IBoxProfile {
-  memberSince: string
-  coverPhoto: IBoxImage[]
-  location: string
-  emoji: string
-  job: string
-  employer: string
-  website: string
-  description: string
-  ethereum_proof: {
-    consent_msg: string
-    consent_signature: string
-    linked_did: string
-  }
-  proof_did: string
-  github: string
-  image: IBoxImage[]
-  name: string
-}
-
-export interface ContextType {
-  state: any;
-  dispatch: React.Dispatch<{ type: string; value: unknown }>;
-}
-
-export type StateType = {
+export type Web3ConnectStateType = {
   provider?: any
   web3Provider?: any
   address?: string
   chainId?: number
   chainData?: any
-  eth?: any
-  nexo?: any
-  tokens?: any
+  isConnected?: boolean
+  isUnsupportedChain?: boolean
 }
 
-export type ActionType =
+export type Web3ConnectActionType =
   | {
     type: "SET_WEB3_PROVIDER"
-    provider?: StateType["provider"]
-    web3Provider?: StateType["web3Provider"]
-    address?: StateType["address"]
-    chainId?: StateType["chainId"]
-    chainData?: StateType["chainData"]
+    payload: {
+      provider?: Web3ConnectStateType["provider"]
+      web3Provider?: Web3ConnectStateType["web3Provider"]
+      address?: Web3ConnectStateType["address"]
+      chainId?: Web3ConnectStateType["chainId"]
+      chainData?: Web3ConnectStateType["chainData"]
+    }
   }
   | {
     type: "SET_ADDRESS"
-    address?: StateType["address"]
+    payload: {
+      address?: Web3ConnectStateType["address"]
+    }
   }
   | {
-    type: "SET_CHAIN_ID"
-    chainId?: StateType["chainId"]
-    chainData?: StateType["chainData"]
+    type: "SET_IS_CONNECTED"
+    payload: {
+      isConnected?: Web3ConnectStateType["isConnected"]
+    }
   }
   | {
-    type: "SET_ETH"
-    eth?: StateType["eth"]
-  }
-  | {
-    type: "SET_NEXO"
-    nexo?: StateType["nexo"]
+    type: "SET_IS_UNSUPPORTED_CHAIN"
+    payload: {
+      isUnsupportedChain?: Web3ConnectStateType["isUnsupportedChain"]
+    }
   }
   | {
     type: "RESET_WEB3_PROVIDER"
+  }
+
+  
+export type Currency = {
+  symbol: string
+  balance?: string
+  totalSupply?: string
+  decimals?: number
+}
+
+export type CurrenciesStateType = {
+  eth?: Currency
+  [currency: string]: any
+}
+
+export type CurrenciesActionType =
+  | {
+    type: "SET_ETH"
+    payload: {
+      eth: CurrenciesStateType["eth"]
+    }
+  }
+  | {
+    type: "SET_CURRENCY"
+    payload: {
+      currency: CurrenciesStateType["currency"]
+    }
   }

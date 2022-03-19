@@ -1,20 +1,15 @@
-import { useContext } from 'react'
-import Grid from '@mui/material/Grid'
-import Typography from '@mui/material/Typography'
-
-import { AppContext } from '../context'
-import { ContextType } from '../types'
+import Grid from "@mui/material/Grid"
+import Typography from "@mui/material/Typography"
+import { useSelector } from "react-redux"
 
 const Account = () => {
-  const { state }: ContextType = useContext(AppContext)
-
-  const { address, chainData } = state
+  const { address, chainData } = useSelector((state) => (state as any).web3Connect)
 
   return (
     <Grid container spacing={1}>
       <Grid container>
         <Grid item xs={12}>
-          <Typography sx={{ color: '#017abd' }} variant="h6" component="div">
+          <Typography sx={{ color: "#017abd" }} variant="h6" component="div">
             Address&nbsp;
           </Typography>
         </Grid>
@@ -24,7 +19,7 @@ const Account = () => {
       </Grid>
       <Grid container>
         <Grid item xs={12}>
-        <Typography sx={{ color: '#017abd' }} variant="h6" component="div">
+        <Typography sx={{ color: "#017abd" }} variant="h6" component="div">
           Network&nbsp;
         </Typography>
         </Grid>

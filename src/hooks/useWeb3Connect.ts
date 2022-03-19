@@ -1,10 +1,9 @@
-import { useCallback, useEffect } from "react"
+import { useEffect } from "react"
+import { useSelector, useDispatch } from "react-redux"
 import WalletConnectProvider from "@walletconnect/web3-provider"
-import { providers } from "ethers"
 import Web3Modal from "web3modal"
-import { toast } from "react-toastify"
 
-import { getChainData } from "../helpers/utils"
+import { connect, disconnect, setAddress, setIsConnected, setUnsupportedChain } from "../actions/web3Connect"
 
 const INFURA_ID = process.env.REACT_APP_INFURA_ID
 
@@ -25,61 +24,20 @@ if (typeof window !== "undefined") {
   })
 }
 
-const useWeb3Connect = (state: any, dispatch: any): any => {
-  const { provider, web3Provider, chainData } = state
-
-  const connect = useCallback(async function () {
-    try {
-      const provider = await web3Modal.connect()
-      const web3Provider = new providers.Web3Provider(provider)
-      const signer = web3Provider.getSigner()
-      const network = await web3Provider.getNetwork()
-      const address = await signer.getAddress()
-      const chainData = getChainData(network?.chainId)
-
-      dispatch({
-        type: "SET_WEB3_PROVIDER",
-        provider,
-        web3Provider,
-        address,
-        chainId: network?.chainId,
-        chainData
-      })
-    } catch (e: any) {
-      toast.error(e.message)
-    }
-  }, [dispatch])
-
-  const disconnect = useCallback(
-    async function () {
-      try {
-        await web3Modal.clearCachedProvider()
-        if (provider?.disconnect && typeof provider.disconnect === "function") {
-          await provider.disconnect()
-        }
-        dispatch({
-          type: "RESET_WEB3_PROVIDER",
-        })
-      } catch (e: any) {
-        toast.error(e.message)
-      }
-    },
-    [dispatch, provider]
-  )
+const useWeb3Connect = (): any => {
+  const dispatch = useDispatch()
+  const { provider, web3Provider, chainData, address } = useSelector((state) => (state as any).web3Connect)
 
   useEffect(() => {
     if (web3Modal.cachedProvider) {
-      connect()
+      dispatch(connect(web3Modal))
     }
-  }, [connect])
+  }, [dispatch])
 
   useEffect(() => {
     if (provider?.on) {
       const handleAccountsChanged = (accounts: string[]) => {
-        dispatch({
-          type: "SET_ADDRESS",
-          address: accounts[0],
-        })
+        dispatch(setAddress(accounts[0]))
       }
 
       const handleChainChanged = (_hexChainId: string) => {
@@ -87,7 +45,7 @@ const useWeb3Connect = (state: any, dispatch: any): any => {
       }
 
       const handleDisconnect = (error: { code: number, message: string }) => {
-        disconnect()
+        dispatch(disconnect(web3Modal))
       }
 
       provider.on("accountsChanged", handleAccountsChanged)
@@ -102,11 +60,21 @@ const useWeb3Connect = (state: any, dispatch: any): any => {
         }
       }
     }
-  }, [provider, disconnect, dispatch])
+  }, [provider, dispatch, address])
 
-  const isUnsupportedChain = !!web3Provider && !chainData
+  useEffect(() => {
+    dispatch(setIsConnected(!!web3Provider && !!chainData && !!address))
+  }, [address, chainData, dispatch, web3Provider])
 
-  return [{ connect, disconnect }, { isUnsupportedChain }]
+  useEffect(() => {
+    dispatch(setUnsupportedChain(!!web3Provider && !chainData))
+  }, [chainData, dispatch, web3Provider])
+
+  
+  const onConnect = () => dispatch(connect(web3Modal))
+  const onDisconnect = () => dispatch(disconnect(web3Modal))
+
+  return { onConnect, onDisconnect }
 }
 
 export default useWeb3Connect
