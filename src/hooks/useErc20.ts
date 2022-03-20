@@ -1,101 +1,59 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { utils } from "ethers"
 import { toast } from "react-toastify"
 
-import { setCurrency } from "../actions/currencies"
+import useBlock from "./useBlock"
+import { updateMainToken } from "../actions/assets"
 import { getContract } from "../helpers/ethers"
 import Token from "../const/abis/Token.json"
+import { getTokenSymbol } from "../services/tokens"
+import { StateType } from "../types"
+import { Contract } from "ethers"
 
 const useErc20 = (contractAddress: string): any => {
   const dispatch = useDispatch()
-  const [symbol, setSymbol] = useState()
-  const { address, web3Provider, isConnected } = useSelector((state) => (state as any).web3Connect)
-  const prevBalanceRef = useRef<string| null>(null)
-  const [contract, setContract] = useState<null | any>(null)
-
-  const clearContract = () => {
-    setContract(null)
-  }
-
-  const fetchMeta = useCallback(async () => {
+  const [symbol, setSymbol] = useState<string | null>(null)
+  const [contract, setContract] = useState<null | Contract>(null)
+  const isConnected = useSelector((state: StateType) => state.web3Connect.isConnected)
+  const web3Provider = useSelector((state: StateType) => state.web3Connect.web3Provider)
+  const address = useSelector((state: StateType) => state.web3Connect.address)
+ 
+  const fetchTokenSymbol = useCallback(async () => {
     try {
-      const [symbol, decimals, totalSupply]: any = await Promise.all([
-        contract?.symbol(),
-        contract?.decimals(),
-        contract?.totalSupply()
-      ])
-      dispatch(setCurrency({ symbol, decimals, totalSupply }))
+      const symbol = await getTokenSymbol(contract as Contract)
       setSymbol(symbol)
     } catch (e: any) {
       toast.error(e.message)
     }
-  }, [contract, dispatch])
+  }, [contract])
 
-
-  const fetchBalance = useCallback(async () => {
-    try {
-      if (symbol) {
-        const balanceRaw = await contract?.balanceOf(address)
-        const balance =  utils.formatEther(balanceRaw).toString()
-        if (balance !== prevBalanceRef.current) {
-          prevBalanceRef.current = balance as string
-          dispatch(setCurrency({ symbol, balance }))
-        }
-      }
-    } catch (e: any) {
-      toast.error(e.message)
-    }
+  const fetchTokenAsset = useCallback(() => {
+    if (!!symbol && !!contract && !!address) dispatch(updateMainToken(contract, symbol, address))
   }, [symbol, contract, address, dispatch])
 
-  const initContract = useCallback(
-    async function () {
-      try {
-        setContract(
-          getContract(
-            contractAddress as string,
-            (Token as any).abi,
-            web3Provider.getSigner(),
-          ),
-        )
-      } catch (e: any) {
-        toast.error(e.message)
-      }
-    },
-    [contractAddress, web3Provider],
-  )
+  useEffect(() => {
+    if (symbol) fetchTokenAsset()
+  }, [fetchTokenAsset, symbol])
 
   useEffect(() => {
-    if (symbol) {
-      fetchBalance()
-    }
-  }, [fetchBalance, symbol])
-
-  useEffect(() => {
-    if (contract) {
-      fetchMeta()
-    }
-  }, [fetchMeta, contract])
+    if (contract) fetchTokenSymbol()
+  }, [fetchTokenSymbol, contract])
 
   useEffect(() => {
     if (isConnected) {
-      initContract()
+      setContract(
+        getContract(
+          contractAddress as string,
+          (Token as { abi: { [key: string]: any }[] }).abi,
+          web3Provider.getSigner(),
+        ),
+      )
     } else {
-      clearContract()
+      setContract(null)
     }
-  }, [initContract, isConnected])
+  }, [isConnected, contractAddress, web3Provider])
 
-  useEffect(() => {
-    if (symbol && web3Provider?.on) {
-      web3Provider.on('block', fetchBalance)
-
-      return () => {
-        if (web3Provider.off) {
-          web3Provider.off("block", fetchBalance)
-        }
-      }
-    }
-  }, [fetchBalance, web3Provider, symbol])
+  useBlock(fetchTokenAsset)
 
   return symbol
 }

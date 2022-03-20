@@ -1,19 +1,41 @@
 import Grid from "@mui/material/Grid"
+import LinearProgress from "@mui/material/LinearProgress"
 
-import Balance from "./Balance"
-import useEth from "../hooks/useEth"
-import useErc20 from "../hooks/useErc20"
+import Asset from "./Asset"
 import { useSelector } from "react-redux"
+import { StateType } from "../types"
 
 const Portfolio = () => {
-  useEth()
-  const nexoSymbol = useErc20(process.env.REACT_APP_NEXO_ETH_MAIN_NET_CONTRACT_ADDRESS as string)
-  const currencies = useSelector((state) => (state as any).currencies)
+  const address = useSelector((state: StateType) => state.web3Connect.address)
+  const mainAssets = useSelector(
+    (state: StateType) => address ? state.assets.main[address]?.assets : null
+  )
+  const additionalAssets = useSelector(
+    (state: StateType) => address ? state.assets.additional[address]?.assets : null
+  )
+  const additionalAssetsInitiallyLoaded = useSelector(
+    (state: StateType) => address ? state.assets.additional[address]?.initiallyLoaded : null
+  )
 
   return (
-    <Grid container spacing={1}>
-      {currencies?.eth && <Balance currency={currencies.eth} />}
-      {!!currencies[nexoSymbol] && <Balance currency={currencies[nexoSymbol]} />}
+    <Grid container>
+      {!!mainAssets &&
+        Object.keys(mainAssets).length > 0 &&
+        Object.keys(mainAssets).map((symbol: string) => (
+          <Asset key={symbol} asset={mainAssets[symbol]} />
+        ))}
+      {!!additionalAssets &&
+        Object.keys(additionalAssets).length > 0 &&
+        Object.keys(additionalAssets).map((symbol: string) => (
+          <Asset key={symbol} asset={additionalAssets[symbol]} />
+        ))}
+      {!additionalAssetsInitiallyLoaded && (
+        <Grid container >
+          <Grid item xs={12}>
+            <LinearProgress />
+          </Grid>
+        </Grid>
+      )}
     </Grid>
   )
 }

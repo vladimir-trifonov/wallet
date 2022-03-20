@@ -20,7 +20,8 @@ export interface IChainData {
 export type Web3ConnectStateType = {
   provider?: any
   web3Provider?: any
-  address?: string
+  batchProvider?: any
+  address?: string | null
   chainId?: number
   chainData?: any
   isConnected?: boolean
@@ -33,6 +34,7 @@ export type Web3ConnectActionType =
     payload: {
       provider?: Web3ConnectStateType["provider"]
       web3Provider?: Web3ConnectStateType["web3Provider"]
+      batchProvider?: Web3ConnectStateType["batchProvider"]
       address?: Web3ConnectStateType["address"]
       chainId?: Web3ConnectStateType["chainId"]
       chainData?: Web3ConnectStateType["chainData"]
@@ -59,30 +61,61 @@ export type Web3ConnectActionType =
   | {
     type: "RESET_WEB3_PROVIDER"
   }
-
   
-export type Currency = {
+export type AssetType = {
+  address?: string
   symbol: string
   balance?: string
   totalSupply?: string
   decimals?: number
 }
 
-export type CurrenciesStateType = {
-  eth?: Currency
-  [currency: string]: any
+export type AssetsObjectType = {
+  [symbol: string]: AssetType
 }
 
-export type CurrenciesActionType =
+export type AssetsStateType = {
+  main: {
+    [address: string]: {
+      assets: AssetsObjectType
+    }
+  }
+  additional: {
+    [address: string]: {
+      assets: AssetsObjectType,
+      initiallyLoaded: boolean
+    }
+  }
+}
+
+export type StateType = {
+  web3Connect: Web3ConnectStateType
+  assets: AssetsStateType
+}
+
+export type AssetsActionType =
   | {
-    type: "SET_ETH"
+    type: "UPDATE_MAIN_ASSET"
     payload: {
-      eth: CurrenciesStateType["eth"]
+      asset: AssetType
+      address: string
     }
   }
   | {
-    type: "SET_CURRENCY"
+    type: "SET_ADDITIONAL_ASSETS"
     payload: {
-      currency: CurrenciesStateType["currency"]
+      assets: AssetsObjectType
+      address: string
+      allLoaded: boolean
     }
+  }
+  | {
+    type: "UPDATE_ADDITIONAL_ASSETS"
+    payload: {
+      assets: AssetsObjectType
+      address: string
+    }
+  }
+  | {
+    type: "RESET_ASSETS"
   }

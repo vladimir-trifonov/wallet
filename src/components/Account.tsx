@@ -2,8 +2,11 @@ import Grid from "@mui/material/Grid"
 import Typography from "@mui/material/Typography"
 import { useSelector } from "react-redux"
 
+import { StateType } from "../types"
+
 const Account = () => {
-  const { address, chainData } = useSelector((state) => (state as any).web3Connect)
+  const address = useSelector((state: StateType) => state.web3Connect.address)
+  const chainData = useSelector((state: StateType) => state.web3Connect.chainData)
 
   return (
     <Grid container spacing={1}>

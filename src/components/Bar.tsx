@@ -4,11 +4,11 @@ import Typography from "@mui/material/Typography"
 import Button from "@mui/material/Button"
 import { useSelector } from "react-redux"
 
-import { StyledBox } from "./AppBar.styles"
+import { StyledBox } from "./Bar.styles"
 import { supportedChainsText } from "../const/chains"
 import useWeb3Connect from "../hooks/useWeb3Connect"
 
-export const AppBar = (): JSX.Element => {
+export const Bar = (): JSX.Element => {
   const { onConnect, onDisconnect } = useWeb3Connect()
   const { isUnsupportedChain, web3Provider } = useSelector((state) => (state as any).web3Connect)
  
@@ -26,7 +26,7 @@ export const AppBar = (): JSX.Element => {
             variant="caption"
             component="div"
           >
-            Not supported chain. Switch to any of {supportedChainsText}
+            Not supported chain. Switch to {supportedChainsText}
           </Typography>
         )}
         {web3Provider ? (
@@ -43,4 +43,4 @@ export const AppBar = (): JSX.Element => {
   )
 }
 
-export default AppBar
+export default Bar

@@ -3,11 +3,12 @@ import { Web3ConnectStateType, Web3ConnectActionType } from "../types"
 export const initialState: Web3ConnectStateType = {
   provider: null,
   web3Provider: null,
-  address: undefined,
+  batchProvider: null,
+  address: null,
   chainId: undefined,
   chainData: undefined,
-  isConnected: undefined,
-  isUnsupportedChain: undefined
+  isConnected: false,
+  isUnsupportedChain: false
 }
 
 const web3Connect = (state: Web3ConnectStateType = initialState, action: Web3ConnectActionType): Web3ConnectStateType => {
@@ -17,6 +18,7 @@ const web3Connect = (state: Web3ConnectStateType = initialState, action: Web3Con
         ...state,
         provider: action.payload.provider,
         web3Provider: action.payload.web3Provider,
+        batchProvider: action.payload.batchProvider,
         address: action.payload.address,
         chainId: action.payload.chainId,
         chainData: action.payload.chainData,

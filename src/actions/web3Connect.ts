@@ -1,12 +1,18 @@
 import { providers } from "ethers"
 import { toast } from "react-toastify"
-import { getChainData } from "../helpers/utils"
+import Web3Modal from "web3modal"
+import { Dispatch } from "redux"
 
-export const connect = (web3Modal: any) => {
-  return async (dispatch: any) => {
+import { getChainData } from "../helpers/utils"
+import { infuraId, infuraUrl } from "../const"
+import { StateType } from "../types"
+
+export const connect = (web3Modal: Web3Modal) => {
+  return async (dispatch: Dispatch<any>) => {
     try {
       const provider = await web3Modal.connect()
       const web3Provider = new providers.Web3Provider(provider)
+      const batchProvider = !!infuraUrl && !!infuraId ? new providers.JsonRpcBatchProvider(`${infuraUrl}${infuraId}`) : null
       const signer = web3Provider.getSigner()
       const network = await web3Provider.getNetwork()
       const address = await signer.getAddress()
@@ -17,7 +23,8 @@ export const connect = (web3Modal: any) => {
         payload: {
           provider,
           web3Provider,
-          address,
+          batchProvider,
+          address: address,
           chainId: network?.chainId,
           chainData
         }
@@ -28,13 +35,13 @@ export const connect = (web3Modal: any) => {
   }
 }
 
-export const disconnect = (web3Modal: any) => {
-  return async (dispatch: any, getState: any) => {
-    const { provider } = getState()
+export const disconnect = (web3Modal: Web3Modal) => {
+  return async (dispatch: Dispatch<any>, getState: () => StateType) => {
+    const { web3Connect } = getState()
     try {
       await web3Modal.clearCachedProvider()
-      if (provider?.disconnect && typeof provider.disconnect === "function") {
-        await provider.disconnect()
+      if (web3Connect.provider?.disconnect && typeof web3Connect.provider.disconnect === "function") {
+        await web3Connect.provider.disconnect()
       }
 
       dispatch({
@@ -46,7 +53,7 @@ export const disconnect = (web3Modal: any) => {
   }
 }
 
-export const setAddress = (address: string) => {
+export const setAddress = (address: string | null) => {
   return {
     type: "SET_ADDRESS",
     payload: {

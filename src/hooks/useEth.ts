@@ -1,46 +1,38 @@
-import { useCallback, useEffect, useRef } from "react"
-import { utils } from "ethers"
+import { useCallback, useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
-import { setEth } from "../actions/currencies"
+import useBlock from "./useBlock"
+import { updateEthCurrency } from "../actions/assets"
+import { StateType } from "../types"
 
 const useEth = (): any => {
   const dispatch = useDispatch()
-  const prevEthRef = useRef<string | null>(null)
-  const { address, chainData, web3Provider, isConnected } = useSelector((state) => (state as any).web3Connect)
+  const [symbol, setSymbol] = useState<string | null>(null)
+  const isConnected = useSelector((state: StateType) => state.web3Connect.isConnected)
+  const web3Provider = useSelector((state: StateType) => state.web3Connect.web3Provider)
+  const chainData = useSelector((state: StateType) => state.web3Connect.chainData)
+  const address = useSelector((state: StateType) => state.web3Connect.address)
 
-  const fetchEth = useCallback(async () => {
-    const raw = await web3Provider.getBalance(address)
-    const ethValue = utils.formatEther(raw).toString()
-    if (ethValue !== prevEthRef.current) {
-      prevEthRef.current = ethValue
-      
-      dispatch(setEth({
-        balance: ethValue,
-        symbol: chainData.native_currency.symbol,
-        decimals: chainData.native_currency.decimals,
-        totalSupply: "0"
-      }))
+  const fetchEthCurrency = useCallback(() => {
+    if (!!symbol && isConnected) {
+      dispatch(updateEthCurrency(symbol, web3Provider, address!, chainData))
     }
-  }, [address, chainData, dispatch, web3Provider])
+  }, [symbol, isConnected, dispatch, web3Provider, address, chainData])
+
+  useEffect(() => {
+    if (symbol) fetchEthCurrency()
+  }, [fetchEthCurrency, symbol])
 
   useEffect(() => {
     if (isConnected) {
-      fetchEth()
+      const symbol = chainData.native_currency.symbol
+      setSymbol(symbol)
     }
-  }, [fetchEth, isConnected])
+  }, [chainData, setSymbol, isConnected])
 
-  useEffect(() => {
-    if (isConnected && web3Provider?.on) {
-      web3Provider.on("block", fetchEth)
-
-      return () => {
-        if (web3Provider.off) {
-          web3Provider.off("block", fetchEth)
-        }
-      }
-    }
-  }, [fetchEth, isConnected, web3Provider])
+  useBlock(fetchEthCurrency)
+  
+  return symbol
 }
 
 export default useEth

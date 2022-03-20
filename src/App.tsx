@@ -2,16 +2,17 @@ import { useEffect } from "react"
 import { useErrorBoundary } from "use-error-boundary"
 import Box from "@mui/material/Box"
 import Grid from "@mui/material/Grid"
-import Container from "@mui/material/Container"
 import { toast } from "react-toastify"
 import { useSelector } from "react-redux"
 
-import AppBar from "./components/AppBar"
-import Wallet from "./components/Wallet"
+import AppBar from "./components/Bar"
+import Dashboard from "./components/Dashboard"
+import { StateType } from "./types"
+import { StyledGrid, StyledContainer } from "./App.styles"
 
 export const App = (): JSX.Element => {
   const { ErrorBoundary, didCatch, error } = useErrorBoundary()
-  const { chainData, web3Provider } = useSelector((state) => (state as any).web3Connect)
+  const isConnected = useSelector((state: StateType) => state.web3Connect.isConnected)
 
   useEffect(() => {
     if (didCatch && error) {
@@ -24,21 +25,14 @@ export const App = (): JSX.Element => {
       <Box>
         <AppBar />
       </Box>
-      {web3Provider && chainData && (
-        <Container fixed sx={{ flexGrow: 1 }}>
-          <Grid
-            container
-            sx={{
-              height: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
+      {isConnected && (
+        <StyledContainer fixed>
+          <StyledGrid container >
             <Grid item>
-              <Wallet />
+              <Dashboard />
             </Grid>
-          </Grid>
-        </Container>
+          </StyledGrid>
+        </StyledContainer>
       )}
     </ErrorBoundary>
   )

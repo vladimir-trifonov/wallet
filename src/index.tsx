@@ -1,8 +1,10 @@
 import React from "react"
 import ReactDOM from "react-dom"
-import { Provider } from "react-redux";
+import { Provider } from "react-redux"
 import { ThemeProvider, createTheme } from "@mui/material"
 import { toast, ToastContainer } from "react-toastify"
+import CssBaseline from "@mui/material/CssBaseline"
+import darkScrollbar from "@mui/material/darkScrollbar"
 import "react-toastify/dist/ReactToastify.css"
 
 import "./index.css"
@@ -14,12 +16,23 @@ const darkTheme = createTheme({
   palette: {
     mode: "dark",
   },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        html: {
+          ...darkScrollbar(),
+          scrollbarWidth: "thin"
+        }
+      }
+    }
+  }
 })
 
 ReactDOM.render(
   <React.StrictMode>
     <ThemeProvider theme={darkTheme}>
       <Provider store={store}>
+        <CssBaseline />
         <App />
         <ToastContainer
           icon={false}
