@@ -10,5 +10,6 @@ export const StyledPaper = styled(Paper)({
 })
 
 export const StyledBox = styled(Box)(() => ({
-  borderBottom: 1, borderColor: "divider"
+  borderBottom: "1px solid",
+  borderColor: "rgba(255, 255, 255, 0.12)"
 }))

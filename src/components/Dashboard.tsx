@@ -27,7 +27,7 @@ const Dashboard = () => {
     <StyledPaper elevation={0} sx={{ p: 1 }}>
       <Box>
         <TabContext value={tab}>
-          <StyledBox>
+          <StyledBox sx={{ p: 1 }}>
             <TabList onChange={handleChangeTab} aria-label="marketplace tabs">
               <Tab label="Portfolio" value="portfolio" />
               <Tab label="Account" value="account" />
